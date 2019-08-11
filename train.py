@@ -48,7 +48,7 @@ random.seed(1)
 learning_rate = 0.2e-4
 beta1 = 0.5
 beta2 = 0.999
-num_epochs = 10
+num_epochs = 100
 epsilon = 1e-8
 
 optimizer_G = torch.optim.Adam(generator.parameters(), lr= learning_rate, betas= (beta1, beta2))
@@ -59,10 +59,10 @@ transform = transforms.Compose([transforms.Resize((28, 28)),
 	transforms.Normalize([0.5], [0.5])
 ])
 
-os.makedirs("../../data/mnist", exist_ok=True)
+os.makedirs("../data/mnist", exist_ok=True)
 dataloader = torch.utils.data.DataLoader(
     datasets.MNIST(
-        "../../data/mnist",
+        "../data/mnist",
         train=True,
         download=True,
         transform=transform,
@@ -99,7 +99,11 @@ for epoch in range(num_epochs):
 
 		generator.zero_grad()
 
-		z = Variable(Tensor(torch.rand(batch_size, latent_size)))
+		if cuda_available:
+			z = Variable(torch.rand(batch_size, latent_size).type(torch.cuda.FloatTensor))
+		else:
+			z = Variable(torch.rand(batch_size, latent_size).type(torch.FloatTensor))
+
 		gen_imgs = generator(z)
 
 		g_loss = adversarial_loss(discriminator(gen_imgs), valid)
